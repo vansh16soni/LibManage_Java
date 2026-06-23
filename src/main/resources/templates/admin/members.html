@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Members · LibManage</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: topnav}"></div>
+
+<div class="lm-shell">
+    <div th:replace="~{fragments/navbar :: sidebar}"></div>
+
+    <main class="lm-main animate-fade-in">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+            <div>
+                <div class="lm-section-eyebrow">Member Management</div>
+                <h1 class="h3 mb-0">Members</h1>
+                <p class="text-muted mb-0">Review, authorize, and manage system access permissions.</p>
+            </div>
+            
+            <div class="lm-header-actions">
+                <button class="btn btn-lm-outline">
+                    <i class="bi bi-download"></i> Export List
+                </button>
+                <button class="btn btn-lm-teal" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                    <i class="bi bi-person-plus-fill"></i> Add New Member
+                </button>
+            </div>
+        </div>
+
+        <!-- Metric Stats Cards -->
+        <div class="lm-stats-grid">
+            <div class="lm-stat-card">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+                <div class="lm-stat-card-label">Total Members</div>
+                <div class="lm-stat-card-value" th:text="${members.size()}">0</div>
+            </div>
+            
+            <div class="lm-stat-card">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+                </div>
+                <div class="lm-stat-card-label">Active Now</div>
+                <div class="lm-stat-card-value" th:text="${members.?[active].size()}">0</div>
+            </div>
+            
+            <div class="lm-stat-card red-theme">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-person-x"></i>
+                    </div>
+                </div>
+                <div class="lm-stat-card-label">Blocked Members</div>
+                <div class="lm-stat-card-value" th:text="${members.?[!active].size()}">0</div>
+            </div>
+            
+            <div class="lm-stat-card">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+                <div class="lm-stat-card-label">New Requests</div>
+                <div class="lm-stat-card-value">0</div>
+            </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="lm-filter-panel">
+            <div class="lm-filter-search">
+                <i class="bi bi-search"></i>
+                <input type="text" class="form-control" placeholder="Search members...">
+            </div>
+            <button class="lm-filter-btn" title="Filter options">
+                <i class="bi bi-funnel"></i>
+            </button>
+            <div class="lm-rows-select">
+                <span>Show</span>
+                <select>
+                    <option>10 rows</option>
+                    <option>25 rows</option>
+                    <option>50 rows</option>
+                </select>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(members)}" class="lm-panel text-center text-muted py-5">
+            <i class="bi bi-people fs-1 d-block mb-2"></i> No registered members yet.
+        </div>
+
+        <!-- Members Table -->
+        <div class="lm-panel" th:if="${not #lists.isEmpty(members)}">
+            <div class="lm-table-responsive">
+                <table class="lm-table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Role</th>
+                            <th>Joined Date</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="member : ${members}" th:id="'member-row-' + ${member.id}">
+                            <td>
+                                <div class="lm-table-avatar-cell">
+                                    <div class="lm-table-avatar" th:text="${#strings.substring(member.fullName, 0, 1)}">U</div>
+                                    <div>
+                                        <div class="fw-bold" th:text="${member.fullName}">Member Name</div>
+                                        <small class="text-muted" th:text="${member.email}">email@example.com</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-active" th:text="${member.role}">MEMBER</span>
+                            </td>
+                            <td th:text="${#temporals.format(member.createdAt, 'dd MMM yyyy')}">01 Jan 2026</td>
+                            <td>
+                                <span th:id="'member-badge-' + ${member.id}"
+                                      class="badge" th:classappend="${member.active} ? 'badge-active' : 'badge-blocked'"
+                                      th:text="${member.active} ? 'Active' : 'Blocked'">Active</span>
+                            </td>
+                            <td class="text-end">
+                                <button th:if="${member.active}" class="btn btn-sm btn-lm-danger"
+                                        th:data-id="${member.id}"
+                                        onclick="lmToggleMemberBlock(this.getAttribute('data-id'), false, this)">
+                                    <i class="bi bi-slash-circle"></i> Block
+                                </button>
+                                <button th:unless="${member.active}" class="btn btn-sm btn-lm-teal"
+                                        th:data-id="${member.id}"
+                                        onclick="lmToggleMemberBlock(this.getAttribute('data-id'), true, this)">
+                                    <i class="bi bi-check-circle"></i> Unblock
+                                </button>
+                                <a th:href="@{/admin/members/delete/{id}(id=${member.id})}" class="btn btn-sm btn-outline-danger ms-2"
+                                   th:attr="onclick=|return confirm('Delete member &quot;${#strings.escapeJavaScript(member.fullName)}&quot;? This will also remove their borrow history.')|">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</div>
+
+<!-- Add Member Modal -->
+<div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg lm-modal-card">
+            <div class="modal-header border-0 py-3">
+                <h5 class="modal-title" id="addMemberModalLabel">
+                    <i class="bi bi-person-plus-fill text-cyan"></i> Add New Member
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addMemberForm" onsubmit="event.preventDefault(); lmSubmitMemberForm(this);">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control rounded-3" id="fullName" name="fullName" required placeholder="Enter full name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control rounded-3" id="email" name="email" required placeholder="name@example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Temporary Password</label>
+                        <input type="password" class="form-control rounded-3" id="password" name="password" required placeholder="Enter a password">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-lm-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-lm-cyan">Create Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: toast-container}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

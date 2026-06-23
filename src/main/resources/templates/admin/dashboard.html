@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard · LibManage</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: topnav}"></div>
+
+<div class="lm-shell">
+    <div th:replace="~{fragments/navbar :: sidebar}"></div>
+
+    <main class="lm-main animate-fade-in">
+        <div class="lm-main-header">
+            <div class="lm-section-eyebrow">Repository Overview</div>
+            <h1>Dashboard</h1>
+            <p>Real-time synchronization with the academic archive.</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="lm-stats-grid">
+            <div class="lm-stat-card">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <span class="lm-stat-card-badge up">+12%</span>
+                </div>
+                <div class="lm-stat-card-label">Total Books</div>
+                <div class="lm-stat-card-value" th:text="${totalBooks}">0</div>
+            </div>
+            
+            <div class="lm-stat-card">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <span class="lm-stat-card-badge up">+4%</span>
+                </div>
+                <div class="lm-stat-card-label">Total Members</div>
+                <div class="lm-stat-card-value" th:text="${totalMembers}">0</div>
+            </div>
+            
+            <div class="lm-stat-card">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </div>
+                </div>
+                <div class="lm-stat-card-label">Active Borrows</div>
+                <div class="lm-stat-card-value" th:text="${currentlyBorrowed}">0</div>
+            </div>
+            
+            <div class="lm-stat-card red-theme">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <span class="lm-stat-card-badge danger-badge">High</span>
+                </div>
+                <div class="lm-stat-card-label">Overdue Borrows</div>
+                <div class="lm-stat-card-value" th:text="${pendingReturns}">0</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid Layout -->
+        <div class="lm-dashboard-grid">
+            <!-- Left Main Column -->
+            <div class="lm-main-col">
+                <!-- Borrowing Velocity Chart -->
+                <div class="lm-panel">
+                    <div class="lm-panel-title-wrapper">
+                        <div class="lm-panel-title">
+                            <i class="bi bi-bar-chart-line text-teal" style="color: var(--lm-teal);"></i>
+                            <span>Borrowing Velocity</span>
+                        </div>
+                        <div class="lm-rows-select">
+                            <select class="form-select form-select-sm" style="width: auto;">
+                                <option>Weekly</option>
+                                <option>Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+                    <canvas id="leaderboardChart" height="220" th:if="${not #lists.isEmpty(leaderboard)}"></canvas>
+                    <div th:if="${#lists.isEmpty(leaderboard)}" class="text-center text-muted py-5">
+                        <i class="bi bi-bar-chart fs-2 d-block mb-2"></i> No borrowing activity yet.
+                    </div>
+                </div>
+
+                <!-- Recent Activity Table -->
+                <div class="lm-panel">
+                    <div class="lm-panel-title-wrapper">
+                        <div class="lm-panel-title">
+                            <i class="bi bi-clock-history text-teal" style="color: var(--lm-teal);"></i>
+                            <span>Recent Activity</span>
+                        </div>
+                    </div>
+                    <div class="lm-table-responsive">
+                        <table class="lm-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Book</th>
+                                    <th>Borrower</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="borrow : ${activeBorrows}">
+                                    <td class="lm-mono font-semibold" th:text="'#TRX-' + ${#strings.substring(borrow.id, borrow.id.length() - 4)}">#TRX-0000</td>
+                                    <td>
+                                        <div class="lm-table-title-cell">
+                                            <div class="lm-table-book-icon">
+                                                <i class="bi bi-book-half"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold" th:text="${borrow.bookTitle}">Book Title</div>
+                                                <small class="text-muted" th:text="${borrow.bookAuthor}">Author</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td th:text="${borrow.memberName}">Borrower Name</td>
+                                    <td th:text="${#temporals.format(borrow.borrowDate, 'dd MMM yyyy')}">Date</td>
+                                    <td>
+                                        <span class="badge" th:classappend="${borrow.dueDate.isBefore(T(java.time.LocalDateTime).now())} ? 'badge-overdue' : 'badge-active'" th:text="${borrow.dueDate.isBefore(T(java.time.LocalDateTime).now())} ? 'Overdue' : 'Active'">Active</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(activeBorrows)}">
+                                    <td colspan="5" class="text-center text-muted py-4">No active borrowings recorded.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar Column -->
+            <div class="lm-sidebar-col">
+                <div class="lm-alert-card">
+                    <h4>System Update</h4>
+                    <p>The core catalog indices are now fully synchronized with the national academic research archive.</p>
+                    <button class="btn" data-bs-toggle="modal" data-bs-target="#systemUpdateModal">View Details</button>
+                </div>
+
+                <!-- Quick Stats Panel -->
+                <div class="lm-panel">
+                    <div class="lm-panel-title-wrapper">
+                        <div class="lm-panel-title">
+                            <i class="bi bi-graph-up text-teal" style="color: var(--lm-teal);"></i>
+                            <span>Quick Stats</span>
+                        </div>
+                    </div>
+                    
+                    <div class="lm-progress-item">
+                        <div class="lm-progress-label">
+                            <span>New Sign-ups</span>
+                            <span>85%</span>
+                        </div>
+                        <div class="lm-progress-bar-container">
+                            <div class="lm-progress-fill" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="lm-progress-item">
+                        <div class="lm-progress-label">
+                            <span>Return Rate</span>
+                            <span>92%</span>
+                        </div>
+                        <div class="lm-progress-bar-container">
+                            <div class="lm-progress-fill" style="width: 92%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</div>
+
+<div th:replace="~{fragments/footer :: toast-container}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const lmLeaderboard = /*[[${leaderboard}]]*/ [];
+    /*]]>*/
+    document.addEventListener("DOMContentLoaded", () => {
+        if (lmLeaderboard && lmLeaderboard.length) {
+            const labels = lmLeaderboard.map(e => e.book.title);
+            const counts = lmLeaderboard.map(e => e.borrowCount);
+            lmInitLeaderboardChart("leaderboardChart", labels, counts);
+        }
+    });
+</script>
+
+<!-- System Update Modal -->
+<div class="modal fade" id="systemUpdateModal" tabindex="-1" aria-labelledby="systemUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg lm-modal-card">
+            <div class="modal-header border-0 py-3">
+                <h5 class="modal-title" id="systemUpdateModalLabel">
+                    <i class="bi bi-info-circle text-teal" style="color: var(--lm-teal); margin-right: 0.5rem;"></i>
+                    System Update Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <span class="badge bg-teal-soft text-teal mb-2" style="background-color: rgba(56, 178, 172, 0.1); color: var(--lm-teal); font-weight: 600;">v1.0.0 (Latest)</span>
+                    <p class="text-muted small">Released: June 21, 2026</p>
+                </div>
+                <hr>
+                <h6 class="fw-bold mb-3">Sync Status & Highlights:</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-3 d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                        <div>
+                            <strong>Archive Integration</strong>
+                            <p class="text-muted small mb-0">Core catalog indices are fully synchronized with the national academic research archive.</p>
+                        </div>
+                    </li>
+
+                    <li class="mb-3 d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                        <div>
+                            <strong>UI & Usability Upgrades</strong>
+                            <p class="text-muted small mb-0">Modernized dashboards, tables, responsive layouts, and animations have been rolled out.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer border-0 p-3">
+                <button type="button" class="btn btn-lm-teal w-100 py-2 rounded-pill font-semibold text-white" data-bs-dismiss="modal" style="background: var(--lm-teal); border: none;">Acknowledge</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!-- Top Utility Navbar -->
+<div th:fragment="topnav">
+    <nav class="lm-navbar-top">
+        <div class="lm-navbar-brand">
+            <i class="bi bi-book-half text-teal" style="color: var(--lm-teal); font-size: 1.3rem;"></i>
+            <span class="fw-bold">LibManage</span>
+        </div>
+        
+        <div class="lm-navbar-search d-none d-md-block">
+            <i class="bi bi-search"></i>
+            <input type="text" class="form-control" placeholder="Search archives...">
+            <span class="shortcut-badge">CMD + K</span>
+        </div>
+        
+        <div class="lm-navbar-actions">
+
+            <button class="lm-nav-icon-btn d-none d-sm-flex" data-bs-toggle="modal" data-bs-target="#helpModal" aria-label="Help">
+                <i class="bi bi-question-circle"></i>
+            </button>
+            
+            <div class="lm-navbar-user">
+                <span class="lm-user-name d-none d-sm-inline" th:text="${session.fullName}">Admin</span>
+                
+                <form th:action="@{/logout}" method="post" class="m-0" id="logoutForm">
+                    <button type="submit" class="lm-logout-link btn btn-link p-0 align-baseline">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <!-- Help / Quick Guide Modal -->
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg lm-modal-card">
+                <div class="modal-header border-0 py-3">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-question-circle text-teal" style="color: var(--lm-teal); margin-right: 0.5rem;"></i>
+                        Quick Help Guide
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <h6 class="fw-bold mb-3">System Navigation & Controls:</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-3 d-flex align-items-start gap-2">
+                            <i class="bi bi-chevron-right text-teal mt-1"></i>
+                            <div>
+                                <strong>Search Shortcut</strong>
+                                <p class="text-muted small mb-0">Press <kbd class="bg-light text-dark border px-1">CMD + K</kbd> or focus the top bar search to quickly filter items.</p>
+                            </div>
+                        </li>
+                        <li class="mb-3 d-flex align-items-start gap-2">
+                            <i class="bi bi-chevron-right text-teal mt-1"></i>
+                            <div>
+                                <strong>Lending Rules</strong>
+                                <p class="text-muted small mb-0">Standard borrowing length is 14 days. Administrators can edit this on-the-fly during issuance.</p>
+                            </div>
+                        </li>
+                        <li class="mb-3 d-flex align-items-start gap-2">
+                            <i class="bi bi-chevron-right text-teal mt-1"></i>
+                            <div>
+                                <strong>Active Fine Rates</strong>
+                                <p class="text-muted small mb-0">Overdue items are assessed a fine of ₹5 per day, which accumulates dynamically until return.</p>
+                            </div>
+                        </li>
+                        <li class="mb-3 d-flex align-items-start gap-2">
+                            <i class="bi bi-chevron-right text-teal mt-1"></i>
+                            <div>
+                                <strong>Catalog Deletion</strong>
+                                <p class="text-muted small mb-0">Deletion can only be possible through database.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer border-0 p-3">
+                    <button type="button" class="btn btn-lm-teal w-100 py-2 rounded-pill font-semibold text-white" data-bs-dismiss="modal" style="background: var(--lm-teal); border: none;">Got It</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Left Sidebar -->
+<div th:fragment="sidebar" class="lm-sidebar">
+    <div class="lm-sidebar-brand">
+        <h2 th:if="${session.role == 'ADMIN'}">Library Admin</h2>
+        <h2 th:if="${session.role == 'MEMBER'}">LibManage</h2>
+        <span>Academic Archive</span>
+    </div>
+    
+    <ul class="lm-sidebar-menu">
+        <!-- Admin Links -->
+        <li class="nav-item" th:if="${session.role == 'ADMIN'}">
+            <a class="nav-link" th:href="@{/admin/dashboard}" 
+               th:classappend="${requestURI == '/admin/dashboard'} ? 'active' : ''">
+                <i class="bi bi-grid-fill"></i> <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item" th:if="${session.role == 'ADMIN'}">
+            <a class="nav-link" th:href="@{/admin/books}" 
+               th:classappend="${requestURI == '/admin/books'} ? 'active' : ''">
+                <i class="bi bi-book"></i> <span>Books</span>
+            </a>
+        </li>
+        <li class="nav-item" th:if="${session.role == 'ADMIN'}">
+            <a class="nav-link" th:href="@{/admin/members}" 
+               th:classappend="${requestURI == '/admin/members'} ? 'active' : ''">
+                <i class="bi bi-people"></i> <span>Members</span>
+            </a>
+        </li>
+        <li class="nav-item" th:if="${session.role == 'ADMIN'}">
+            <a class="nav-link" th:href="@{/admin/transactions}" 
+               th:classappend="${requestURI == '/admin/transactions'} ? 'active' : ''">
+                <i class="bi bi-arrow-left-right"></i> <span>Transactions</span>
+            </a>
+        </li>
+
+
+
+        <!-- Member Links -->
+        <li class="nav-item" th:if="${session.role == 'MEMBER'}">
+            <a class="nav-link" th:href="@{/member/dashboard}" 
+               th:classappend="${requestURI == '/member/dashboard'} ? 'active' : ''">
+                <i class="bi bi-grid-fill"></i> <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item" th:if="${session.role == 'MEMBER'}">
+            <a class="nav-link" th:href="@{/member/my-books}" 
+               th:classappend="${requestURI == '/member/my-books'} ? 'active' : ''">
+                <i class="bi bi-book"></i> <span>My Books</span>
+            </a>
+        </li>
+
+    </ul>
+
+    <!-- Bottom Actions / Profiles -->
+    <div class="lm-sidebar-profile mt-auto" th:if="${session.role == 'ADMIN'}">
+        <a th:href="@{/admin/books(add=true)}" class="btn btn-lm-teal w-100 py-2 rounded-pill font-semibold d-flex align-items-center justify-content-center gap-1 text-white text-decoration-none shadow-sm" style="background: var(--lm-teal); border: none;">
+            <i class="bi bi-plus-lg"></i> <span>Add New Resource</span>
+        </a>
+    </div>
+
+    <div class="lm-sidebar-profile mt-auto" th:if="${session.role == 'MEMBER'}">
+        <div class="lm-profile-card">
+            <div class="lm-profile-avatar">JD</div>
+            <div class="lm-profile-info">
+                <div class="lm-profile-name" th:text="${session.fullName}">John Doe</div>
+                <div class="lm-profile-role">Student Member</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

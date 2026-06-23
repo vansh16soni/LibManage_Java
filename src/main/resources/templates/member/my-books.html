@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Books · LibManage</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: topnav}"></div>
+
+<div class="lm-shell">
+    <div th:replace="~{fragments/navbar :: sidebar}"></div>
+
+    <main class="lm-main animate-fade-in">
+        <div class="lm-main-header">
+            <div class="lm-section-eyebrow">Your Library</div>
+            <h1>My Books</h1>
+            <p>Track borrow history, active resources, and circulation records.</p>
+        </div>
+
+        <!-- Metrics for Member's Books -->
+        <div class="lm-stats-grid">
+            <div class="lm-stat-card">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-journal-album"></i>
+                    </div>
+                </div>
+                <div class="lm-stat-card-label">Total Loans</div>
+                <div class="lm-stat-card-value" th:text="${history.size()}">0</div>
+            </div>
+            
+            <div class="lm-stat-card">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                </div>
+                <div class="lm-stat-card-label">Currently Borrowed</div>
+                <div class="lm-stat-card-value" th:text="${history.?[status == 'BORROWED'].size()}">0</div>
+            </div>
+            
+            <div class="lm-stat-card red-theme">
+                <div class="lm-stat-card-header">
+                    <div class="lm-stat-card-icon">
+                        <i class="bi bi-exclamation-octagon"></i>
+                    </div>
+                </div>
+                <div class="lm-stat-card-label">Overdue Books</div>
+                <div class="lm-stat-card-value" th:text="${history.?[status == 'BORROWED' and dueDate.isBefore(T(java.time.LocalDateTime).now())].size()}">0</div>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(history)}" class="lm-panel text-center text-muted py-5">
+            <i class="bi bi-journal-x fs-1 d-block mb-2"></i> You haven't borrowed any library resources yet.
+        </div>
+
+        <!-- History Table -->
+        <div class="lm-panel" th:if="${not #lists.isEmpty(history)}">
+            <div class="lm-table-responsive">
+                <table class="lm-table">
+                    <thead>
+                        <tr>
+                            <th>Book Resource</th>
+                            <th>Borrowed Date</th>
+                            <th>Due Date</th>
+                            <th>Returned Date</th>
+                            <th>Fine Incurred</th>
+                            <th>Loan Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="record : ${history}">
+                            <td>
+                                <div class="fw-bold" th:text="${record.bookTitle}">Book Title</div>
+                                <small class="text-muted" th:text="${record.bookAuthor}">Author</small>
+                            </td>
+                            <td class="lm-mono text-sm" th:text="${#temporals.format(record.borrowDate, 'dd MMM yyyy')}">01 Jan 2026</td>
+                            <td>
+                                <span class="lm-mono text-sm" th:text="${#temporals.format(record.dueDate, 'dd MMM yyyy')}">15 Jan 2026</span>
+                                <span th:if="${record.status == 'BORROWED' and record.dueDate.isBefore(T(java.time.LocalDateTime).now())}"
+                                      class="badge badge-blocked ms-1">Overdue</span>
+                            </td>
+                            <td class="lm-mono text-sm" th:text="${record.returnDate != null} ? ${#temporals.format(record.returnDate, 'dd MMM yyyy')} : '—'">—</td>
+                            <td>
+                                <span th:if="${record.fineAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                                      class="badge badge-blocked" th:text="'₹' + ${record.fineAmount}">₹0</span>
+                                <span th:unless="${record.fineAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}" class="text-muted">—</span>
+                            </td>
+                            <td>
+                                <span class="badge" th:classappend="${record.status == 'BORROWED'} ? 'badge-active' : 'badge-active'"
+                                      style="background: var(--lm-bg-light); color: var(--lm-text-dark);"
+                                      th:text="${record.status == 'BORROWED'} ? 'Borrowed' : 'Returned'">Borrowed</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</div>
+
+<div th:replace="~{fragments/footer :: toast-container}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

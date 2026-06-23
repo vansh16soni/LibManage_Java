@@ -1,0 +1,74 @@
+{
+  "users" : [ {
+    "id" : "b9e2606d-c44a-49a4-b0f7-c20d94c08b3c",
+    "fullName" : "Library Admin",
+    "email" : "admin@lib.com",
+    "password" : "admin123",
+    "role" : "ADMIN",
+    "active" : true,
+    "createdAt" : "2026-06-23T15:20:39.907608"
+  }, {
+    "id" : "acbef560-47ca-44d3-9411-163023dfab5b",
+    "fullName" : "mem1",
+    "email" : "mem1@lib.com",
+    "password" : "123456",
+    "role" : "MEMBER",
+    "active" : true,
+    "createdAt" : "2026-06-23T19:10:25.3250902"
+  } ],
+  "books" : [ {
+    "id" : "a6db3179-6c6f-4ef2-bceb-80ba9bb768e2",
+    "title" : "Quantum phy",
+    "author" : "o",
+    "isbn" : "978-0132350884",
+    "totalQuantity" : 3,
+    "availableQuantity" : 3,
+    "coverImageUrl" : "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=200",
+    "shelfLocation" : "B2-4",
+    "description" : "",
+    "createdAt" : "2026-06-23T19:09:57.968727"
+  } ],
+  "borrowRecords" : [ {
+    "id" : "3136e135-0f25-4f8c-801a-d7348780de94",
+    "userId" : "acbef560-47ca-44d3-9411-163023dfab5b",
+    "bookId" : "a6db3179-6c6f-4ef2-bceb-80ba9bb768e2",
+    "borrowDate" : "2026-06-23T19:10:53.6162439",
+    "dueDate" : "2026-06-30T19:10:53.6162439",
+    "returnDate" : "2026-06-23T19:15:45.2252752",
+    "fineAmount" : 0,
+    "status" : "RETURNED",
+    "bookTitle" : "Quantum phy",
+    "bookAuthor" : "o",
+    "bookCoverImageUrl" : "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=200",
+    "memberName" : "mem1",
+    "memberEmail" : "mem1@lib.com"
+  }, {
+    "id" : "d443d1ad-f26a-490e-ae27-4b39bba4e974",
+    "userId" : "acbef560-47ca-44d3-9411-163023dfab5b",
+    "bookId" : "a6db3179-6c6f-4ef2-bceb-80ba9bb768e2",
+    "borrowDate" : "2026-06-23T19:14:53.5931094",
+    "dueDate" : "2026-07-07T19:14:53.5931094",
+    "returnDate" : "2026-06-23T19:15:46.0383056",
+    "fineAmount" : 0,
+    "status" : "RETURNED",
+    "bookTitle" : "Quantum phy",
+    "bookAuthor" : "o",
+    "bookCoverImageUrl" : "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=200",
+    "memberName" : "mem1",
+    "memberEmail" : "mem1@lib.com"
+  }, {
+    "id" : "693f4640-1428-4dc4-bada-9a1f72b6637a",
+    "userId" : "acbef560-47ca-44d3-9411-163023dfab5b",
+    "bookId" : "a6db3179-6c6f-4ef2-bceb-80ba9bb768e2",
+    "borrowDate" : "2026-06-23T19:14:58.0352568",
+    "dueDate" : "2026-07-07T19:14:58.0352568",
+    "returnDate" : "2026-06-23T19:15:48.0762501",
+    "fineAmount" : 0,
+    "status" : "RETURNED",
+    "bookTitle" : "Quantum phy",
+    "bookAuthor" : "o",
+    "bookCoverImageUrl" : "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=200",
+    "memberName" : "mem1",
+    "memberEmail" : "mem1@lib.com"
+  } ]
+}
