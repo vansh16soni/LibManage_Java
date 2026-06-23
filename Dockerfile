@@ -1,12 +1,13 @@
-# Stage 1: Build the Maven application
-FROM maven:3.8.5-openjdk-17-slim AS build
+# Stage 1: Build with Maven
+FROM maven:3.8.5-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY pom.xml .
+RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run the application
-FROM openjdk:17-jdk-slim
+# Stage 2: Run the JAR
+FROM eclipse-temurin:17-jre-slim
 WORKDIR /app
 COPY --from=build /app/target/libmanage.jar app.jar
 EXPOSE 8080
