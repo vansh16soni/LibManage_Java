@@ -1,8 +1,26 @@
+# Local Database File
+database.json
+
+# Maven Build Directory
 target/
 *.class
+
+# User Uploads Directories
+uploads/
+src/main/resources/static/uploads/*
+!src/main/resources/static/uploads/.gitkeep
+
+# IDE and Editor Files
 .idea/
 *.iml
 .vscode/
+.settings/
+.classpath
+.project
+.nbproject/
+*.suo
+*.user
+
+# OS Metadata Files
 .DS_Store
-src/main/resources/static/uploads/*
-!src/main/resources/static/uploads/.gitkeep
+Thumbs.db
